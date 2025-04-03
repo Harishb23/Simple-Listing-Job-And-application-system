@@ -1,0 +1,70 @@
+require("dotenv").config();
+const express = require("express");
+const multer = require("multer");
+const cors = require("cors");
+const fs = require("fs");
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+app.use(express.json());
+app.use(cors());
+
+// Mock job openings data
+const jobOpenings = [
+    { id: 1, title: "Frontend Developer", description: "React Developer with UI/UX skills." },
+    { id: 2, title: "Backend Developer", description: "Node.js Developer with database experience." }
+];
+
+// Serve job openings
+app.get("/jobs", (req, res) => {
+    res.json(jobOpenings);
+});
+
+// Setup Multer for file uploads
+const upload = multer({
+    dest: "uploads/",
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max size
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype === "application/pdf" || file.mimetype.includes("msword")) {
+            cb(null, true);
+        } else {
+            cb(new Error("Invalid file type"), false);
+        }
+    },
+});
+
+// Store applications in memory
+const applications = [];
+
+// Job application endpoint
+app.post("/apply", upload.single("resume"), (req, res) => {
+    const { name, email } = req.body;
+
+    if (!name || !email || !req.file) {
+        console.log("❌ Missing fields:", { name, email, resume: req.file ? req.file.filename : null });
+        return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const application = {
+        id: applications.length + 1,
+        name,
+        email,
+        resume: req.file.path
+    };
+
+    applications.push(application);
+
+    console.log("✅ New Application Submitted:", application); // <-- Logs application data
+
+    res.json({ message: "Application submitted successfully!" });
+});
+
+// Endpoint to check submitted applications
+app.get("/applications", (req, res) => {
+    res.json(applications);
+});
+
+
+// Start the server
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
