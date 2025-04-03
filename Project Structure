@@ -1,0 +1,14 @@
+/job-listing-app
+  ├── frontend/
+  │   ├── src/
+  │   │   ├── components/
+  │   │   ├── pages/
+  │   │   ├── App.js
+  │   │   ├── index.js
+  │   ├── package.json
+  │   ├── .env
+  ├── backend/
+  │   ├── server.js
+  │   ├── package.json
+  │   ├── .env
+  ├── README.md
